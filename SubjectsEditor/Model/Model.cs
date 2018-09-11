@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 
 namespace SubjectsEditor.Model
 {
@@ -371,12 +372,15 @@ namespace SubjectsEditor.Model
         {
             Subjects = new ObservableCollection<Subject>(_subjectsStorage.GetAllSubjects());
             Subjects.CollectionChanged += (o, args) => { _subjectsStorage.PutSubject(args.NewItems[0] as Subject); };
-            ///Subjects.Add(new Subject("Иванааааааааааааааа", "Иванов", "", "1122999777", "01/10/1900"));
         }
 
         public void SortAndSaveSubjects(string path)
         {
-            SubjectsToCsvConverter.SaveToCsv(path, Subjects);
+            var sortedSubjects = Subjects.OrderBy(s => s.Surname)
+                                            .ThenBy(s => s.Name)
+                                            .ThenBy(s => s.Patronymic)
+                                            .ThenBy(s => s.Birthday);
+            SubjectsToCsvConverter.SaveToCsv(path, sortedSubjects);
         }
 
         private ISubjectsStorage _subjectsStorage = new SubjectsStorage("db.csv");
